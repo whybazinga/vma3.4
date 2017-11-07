@@ -5,12 +5,16 @@ public class Methods {
     private double[] b;
     private double[] x;
     double amount;
+    double theoreticalAmount;
+
+    public static final double EPS = 10E-5;
 
     Methods(Matrix A, Matrix E) {
         this.A = A;
         this.E = E;
         B = new Matrix(5, 5);
         amount = 0;
+        theoreticalAmount = 0;
         b = new double[5];
         x = new double[5];
     }
@@ -28,6 +32,12 @@ public class Methods {
             System.out.print(String.format("%.4f ", elem));
         }
         System.out.println();
+        if (theoreticalAmount != 0) {
+            System.out.println("Actual amount/Theoretical amount of iterations\n" + amount + " / " + theoreticalAmount);
+        } else {
+            System.out.println("Actual amount of iterations\n" + amount);
+        }
+
     }
 
     public void showDiscrepancy() {
@@ -47,7 +57,7 @@ public class Methods {
     static boolean checkCond(double[] first, double[] second) {
         boolean flag = true;
         for (int i = 0; i < 5; i++) {
-            if (Math.abs(first[i] - second[i]) < 10E-5 && (first[i] != 0 && second[i] != 0)) {
+            if (Math.abs(first[i] - second[i]) < EPS && (first[i] != 0 && second[i] != 0)) {
                 flag = false;
             }
         }
@@ -92,6 +102,7 @@ public class Methods {
                 x[i] = sum;
             }
         }
+        theoreticalAmount = 0;
     }
 
     public void solveSimpleIterationOrJacobi() {
@@ -104,5 +115,16 @@ public class Methods {
                 x[i] += b[i];
             }
         }
+        this.createTheoreticalAmount();
+    }
+
+    private void createTheoreticalAmount() {
+        double normB = B.getNorm();
+        double normb = 0;
+        for (int i = 0; i < 5; i++)
+            normb = Math.max(normb, Math.abs(b[i]));
+        double numerator = Math.log(EPS * (1 - normB) / normb);
+        double denumerator = Math.log(normB);
+        theoreticalAmount = Math.floor(numerator / denumerator) - 1;
     }
 }
